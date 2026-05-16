@@ -1,0 +1,42 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-primary-light: #d1fae5;
+  --color-secondary: #0ea5e9;
+  
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+  
+  --shadow-soft: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  --shadow-premium: 0 20px 50px -12px rgba(16, 185, 129, 0.15);
+  
+  --radius-2xl: 1.5rem;
+}
+
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-semibold py-3 px-8 rounded-2xl transition-all duration-300 shadow-lg hover:shadow-primary/30 transform hover:-translate-y-1 active:scale-95;
+  }
+  
+  .glass-card {
+    @apply bg-white/80 backdrop-blur-md border border-white/20 shadow-soft rounded-2xl;
+  }
+  
+  .section-padding {
+    @apply py-20 px-6 max-w-7xl mx-auto;
+  }
+}
+
+/* GSAP Animation initial states */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+}
