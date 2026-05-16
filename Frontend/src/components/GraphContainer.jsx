@@ -21,7 +21,7 @@ const mockGraph = {
   ]
 };
 
-const GraphContainer = ({ isAnimating, pathFound, resetTrigger }) => {
+const GraphContainer = ({ isAnimating, pathFound, resetTrigger, pathData }) => {
   const svgRef = useRef(null);
 
   useEffect(() => {
@@ -45,33 +45,43 @@ const GraphContainer = ({ isAnimating, pathFound, resetTrigger }) => {
       // Reset animations
       gsap.to('.path-highlight', { strokeDashoffset: 1000, duration: 0.5 });
       gsap.to('.node-highlight', { fill: 'white', scale: 1, duration: 0.3 });
+      gsap.to('.graph-node text', { fill: '#334155', duration: 0.3 }); // Reset text color
     }
   }, [resetTrigger]);
 
   useEffect(() => {
-    if (isAnimating && pathFound) {
-      // Simulate path finding animation
-      // For this mock, we assume path A -> C -> D
-      
+    if (isAnimating && pathFound && pathData && pathData.path) {
       const tl = gsap.timeline();
+      const path = pathData.path;
       
-      // Highlight A
-      tl.to('#node-A circle', { fill: '#d1fae5', stroke: '#10b981', scale: 1.2, duration: 0.3 });
-      
-      // Highlight Edge A-C
-      tl.to('#edge-A-C-highlight', { strokeDashoffset: 0, duration: 0.5 });
-      
-      // Highlight C
-      tl.to('#node-C circle', { fill: '#d1fae5', stroke: '#10b981', scale: 1.2, duration: 0.3 });
-      
-      // Highlight Edge C-D
-      tl.to('#edge-C-D-highlight', { strokeDashoffset: 0, duration: 0.5 });
-      
-      // Highlight D
-      tl.to('#node-D circle', { fill: '#10b981', stroke: '#059669', scale: 1.3, duration: 0.4, ease: 'back.out' });
-      tl.to('#node-D text', { fill: 'white', duration: 0.1 }, "<");
+      for (let i = 0; i < path.length; i++) {
+        const node = path[i];
+        const isLastNode = i === path.length - 1;
+        
+        // Highlight Node
+        if (isLastNode) {
+          tl.to(`#node-${node} circle`, { fill: '#10b981', stroke: '#059669', scale: 1.3, duration: 0.4, ease: 'back.out' });
+          tl.to(`#node-${node} text`, { fill: 'white', duration: 0.1 }, "<");
+        } else {
+          tl.to(`#node-${node} circle`, { fill: '#d1fae5', stroke: '#10b981', scale: 1.2, duration: 0.3 });
+        }
+        
+        // Highlight Edge
+        if (!isLastNode) {
+          const nextNode = path[i+1];
+          // Find the correct edge in our mockGraph to get the right ID
+          const edgeObj = mockGraph.edges.find(e => 
+            (e.source === node && e.target === nextNode) || 
+            (e.source === nextNode && e.target === node)
+          );
+          
+          if (edgeObj) {
+            tl.to(`#edge-${edgeObj.source}-${edgeObj.target}-highlight`, { strokeDashoffset: 0, duration: 0.5 });
+          }
+        }
+      }
     }
-  }, [isAnimating, pathFound]);
+  }, [isAnimating, pathFound, pathData]);
 
   return (
     <div className="w-full h-full bg-slate-50 relative overflow-hidden flex items-center justify-center p-8">

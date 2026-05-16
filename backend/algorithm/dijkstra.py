@@ -1,55 +1,35 @@
 import os
 import sys
-
+import heapq
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from graphs.graph_data import graph
 
 def dijkstra(graph, start, end):
-    dist = {}
-    visited = {}
-    parent = {}
-    for vertex in graph:
-        dist[vertex] = 999
-        visited[vertex] = 0
-        parent[vertex] = None
-    dist[start]=0
-    parent[start] = start
+    if start not in graph or end not in graph:
+        return {"path": [], "cost": -1}
 
-    for i in range(len(graph)):
-        min_vertex = find_min(dist, visited, graph)
-        visited[min_vertex]=1
+    # Priority queue stores (cost, current_node, path)
+    queue = [(0, start, [start])]
+    visited = set()
 
-        for vertex, distance in graph[min_vertex].items():
-            if(dist[vertex]>dist[min_vertex]+distance and visited[vertex]==0):
-                dist[vertex]=dist[min_vertex]+distance
-                parent[vertex] = min_vertex
-    path = route(parent,end)
-    return dist[end], path
+    while queue:
+        cost, node, path = heapq.heappop(queue)
 
-def find_min(dist, visited, graph):
-    min_value = 999
-    for vertex in graph:
-        if(dist[vertex]<min_value and visited[vertex]==0):
-            min_value = dist[vertex]
-            min_vertex = vertex
-    return min_vertex
+        if node in visited:
+            continue
+            
+        visited.add(node)
 
-def route(parent, end):
-    node=end
-    path = []
-    while(parent[node] != node):
-           path.append(node)
-           node=parent[node]
-    path.append(node)
-    path.reverse()
-    return path
+        if node == end:
+            return {"path": path, "cost": cost}
+
+        for neighbor, weight in graph[node].items():
+            if neighbor not in visited:
+                heapq.heappush(queue, (cost + weight, neighbor, path + [neighbor]))
+
+    return {"path": [], "cost": -1}
 
 if __name__ == "__main__":
-    start = "A"
-    end = "D"
-    parent = {}
-    result, path  = dijkstra(graph, start, end)
-    print("Dijkstra Result:", result)
-    print("Dijkstra Path:", path)
+    print(dijkstra(graph, "A", "D"))

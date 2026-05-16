@@ -15,15 +15,47 @@ const MapPage = () => {
   const [isAnimating, setIsAnimating] = useState(false);
   const [pathFound, setPathFound] = useState(false);
   const [resetTrigger, setResetTrigger] = useState(0);
+  const [pathData, setPathData] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleFindRoute = () => {
-    // In a real app, this would call the FastAPI backend.
-    // For now, we simulate the pathfinding animation.
+  const handleFindRoute = async () => {
     setResetTrigger(prev => prev + 1); // Reset before finding new
-    setTimeout(() => {
-      setIsAnimating(true);
-      setPathFound(true);
-    }, 100); // Slight delay to allow reset to happen
+    setIsAnimating(false);
+    setPathFound(false);
+    setError(null);
+    setPathData(null);
+
+    try {
+      const response = await fetch('http://localhost:8000/api/find-route', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          source: source,
+          destination: destination,
+          algorithm: algorithm,
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.detail || 'Failed to find route');
+      }
+
+      const data = await response.json();
+      setPathData(data);
+      
+      setTimeout(() => {
+        setIsAnimating(true);
+        setPathFound(true);
+      }, 100);
+      
+    } catch (err) {
+      console.error("Error finding route:", err);
+      setError(err.message);
+      alert(`Error: ${err.message}`); // Simple alert for error feedback
+    }
   };
 
   const handleReset = () => {
@@ -31,6 +63,8 @@ const MapPage = () => {
     setDestination('');
     setIsAnimating(false);
     setPathFound(false);
+    setPathData(null);
+    setError(null);
     setResetTrigger(prev => prev + 1);
   };
 
@@ -69,11 +103,12 @@ const MapPage = () => {
             isAnimating={isAnimating}
             pathFound={pathFound}
             resetTrigger={resetTrigger}
+            pathData={pathData}
           />
           
           <RouteInfoCard 
             algorithm={algorithm}
-            cost={pathFound ? "15 units" : "-"}
+            cost={pathFound && pathData ? `${pathData.cost} units` : "-"}
             isVisible={pathFound}
           />
         </main>
