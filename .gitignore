@@ -30,7 +30,7 @@ Thumbs.db
 
 # Build Files
 build/
-dist/
+# dist/
 
 # Matplotlib Cache
 .matplotlib/
