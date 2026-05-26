@@ -7,7 +7,9 @@ app = FastAPI(title="Smart Route Planner")
 # Allow CORS for React frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"], # Common React/Vite ports
+    allow_origins=["http://localhost:5173",
+                   "http://localhost:3000",
+                   "https://kinetic-map.vercel.app"], # Common React/Vite ports
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
