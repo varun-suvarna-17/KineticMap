@@ -7,6 +7,8 @@ from algorithm.astar import astar
 from algorithm.greedy import greedy
 from graphs.graph_data import graph as default_graph
 
+import time
+
 router = APIRouter(prefix="/api")
 
 class RouteRequest(BaseModel):
@@ -22,6 +24,8 @@ class RouteResponse(BaseModel):
     cost: Union[float, int, str]
 
 def run_algorithm(algo_name, graph_data, source, destination):
+    start_time = time.perf_counter()
+
     algo_name = algo_name.lower()
 
     if "dijkstra" in algo_name:
@@ -36,14 +40,15 @@ def run_algorithm(algo_name, graph_data, source, destination):
     else:
         raise HTTPException(status_code=400, detail="Invalid algorithm selected")
 
-    if not result["path"] or result["cost"] == -1:
-        raise HTTPException(status_code=404, detail="No path found")
+    end_time = time.perf_counter()
+    execution_time = round((end_time - start_time) * 1000, 4)
 
-    return RouteResponse(
-        algorithm=label,
-        path=result["path"],
-        cost=result["cost"]
-    )
+    return {
+        "algorithm": label,
+        "path": result["path"],
+        "cost": result["cost"],
+        "time": execution_time
+    }
 
 @router.post("/find-route", response_model=RouteResponse)
 def find_route(request: RouteRequest):
